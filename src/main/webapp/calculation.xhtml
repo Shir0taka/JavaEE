@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html" xmlns:c="http://java.sun.com/jsp/jstl/core"
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+>
+<h:head>
+    <title>Calculation Page</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/cerulean/bootstrap.min.css"/>
+
+</h:head>
+
+<h:body class="container mt-4">
+
+    <h:form class="mb-5">
+        <div class="form-group">
+            <label for="initialValue" class="font-weight-bold">Initial Value:</label>
+            <h:inputText id="initialValue" class="form-control" value="#{calculationController.value}" />
+        </div>
+
+        <div class="form-group">
+            <h:commandButton class="btn btn-primary" value="Initial value" action="#{calculationController.produceIntValue()}"/>
+        </div>
+
+        <div class="form-group">
+            <h:outputText value="Result: #{calculationBean.value}" class="form-control"/>
+        </div>
+    </h:form>
+
+    <br/>
+
+    <h:form class="mb-5">
+        <div class="form-group">
+            <label for="operator" class="font-weight-bold">Choose operation: * / + -</label>
+            <h:inputText id="operator" class="form-control" value="#{calculationBean.operator}" required="true"/>
+        </div>
+
+        <div class="form-group">
+            <label for="operand" class="font-weight-bold">Enter value:</label>
+            <h:inputText id="operand" class="form-control" value="#{calculationBean.operand}"/>
+        </div>
+
+        <div class="form-group">
+            <h:commandButton style="width: 100px;" class="btn btn-success" value="=" action="#{calculationBean.calculate}"/>
+        </div>
+
+        <div class="form-group">
+            <h:outputText value="Result: #{calculationBean.result}" class="form-control"/>
+        </div>
+    </h:form>
+
+    <br/>
+
+    <h:form class="mb-5">
+        <h:outputText value="Class name: #{MetadataBean.calculationBeanClassName}" class="font-weight-bold"/>
+    </h:form>
+
+    <h:form>
+        <h:dataTable value="#{MetadataBean.fields}" var="field" class="table table-bordered">
+            <h:column>
+                <h:outputText value="Field name: " class="font-weight-bold"/>
+                #{field.name}
+            </h:column>
+            <h:column>
+                <h:outputText value="Field type: " class="font-weight-bold"/>
+                #{field.type}
+            </h:column>
+        </h:dataTable>
+    </h:form>
+</h:body>
+</html>

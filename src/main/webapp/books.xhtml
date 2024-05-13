@@ -1,0 +1,305 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
+<h:head>
+    <title>Book Database</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/cerulean/bootstrap.min.css"/>
+    <link rel="stylesheet" href="././resources/css/style.css"/>
+
+</h:head>
+<h:body class="container text-center">
+    <div class="container mt-5">
+        <h:form>
+            <div class="form-group">
+                <label for="messageInput">Enter Message:</label>
+                <h:inputText id="messageInput" class="form-control" value="#{webSocketBean.message}" />
+            </div>
+            <div class="form-group">
+                <h:commandButton class="btn btn-primary" value="Send Message" action="#{webSocketBean.sendMessage}" />
+            </div>
+        </h:form>
+
+        <div class="mt-3">
+            <p class="lead">Received Message:</p>
+            <h:outputText value="#{webSocketBean.receivedMessage}" />
+        </div>
+
+        <hr class="my-4"> </hr>
+
+        <h:form>
+            <div class="form-group">
+                <h:commandButton class="btn btn-success" value="Load Books" action="#{jsonBean.loadBooks}" />
+            </div>
+        </h:form>
+
+        <div class="mt-3">
+            <p class="lead">Books in JSON Format:</p>
+            <pre>
+                <code>
+                    #{jsonBean.bookJson}
+                </code>
+            </pre>
+        </div>
+    </div>
+
+    <h:outputText value="Number of Users: #{sessionController.counter}"/>
+    <br/>
+    <h:form id="addBookForm">
+        <h2 class="mt-4">Add new book</h2>
+
+        <div class="form-group">
+            <h:outputLabel for="title" value="Title:"/>
+            <h:inputText id="title" class="form-control" value="#{bookController.book.title}" required="true"/>
+        </div>
+
+        <div class="form-group">
+            <h:outputLabel for="genre" value="Genre:"/>
+            <h:inputText id="genre" class="form-control" value="#{bookController.book.genre}" required="true"/>
+        </div>
+
+        <div class="form-group">
+            <h:outputLabel for="releaseYear" value="Release Year:"/>
+            <h:inputText id="releaseYear" class="form-control" value="#{bookController.book.releaseYear}" required="true"/>
+        </div>
+        <h:commandButton class="btn btn-primary" value="Add Book" action="#{bookController.createBook}"/>
+    </h:form>
+
+    <hr/>
+
+    <h:form id="bookListForm">
+        <h2 class="mt-4">Book List</h2>
+        <h:dataTable var="book" value="#{bookController.allBooks}" class="table table-bordered mt-3">
+            <h:column>
+                <f:facet name="header">ID</f:facet>
+                #{book.id}
+            </h:column>
+            <h:column>
+                <f:facet name="header">Title</f:facet>
+                #{book.title}
+            </h:column>
+            <h:column>
+                <f:facet name="header">Genre</f:facet>
+                #{book.genre}
+            </h:column>
+            <h:column>
+                <f:facet name="header">Release Year</f:facet>
+                #{book.releaseYear}
+            </h:column>
+            <h:column>
+                    <h:commandButton class="btn btn-warning" value="Update"
+                                     action="#{bookController.redirectToUpdatePage(book)}"/>
+                    <h:commandButton class="btn btn-danger" value="Delete"
+                                     action="#{bookController.deleteBook(book.id)}"/>
+            </h:column>
+        </h:dataTable>
+        <h:commandButton class="btn btn-info" value="Refresh"
+                         action="#{bookController.refreshBookList}" />
+    </h:form>
+
+
+    <h2 class="mt-4">Book filter</h2>
+
+    <h:form id="findBookForm" class="find-form">
+        <div class="form-group">
+            <h:outputLabel for="bookId" class="col-form-label" value="Enter Book ID:"/>
+            <h:inputText id="bookId" class="form-control" value="#{bookController.book.id}" />
+            <h:commandButton class="btn btn-secondary" value="Find Book" action="#{bookController.findAndDisplayBook}" />
+
+        </div>
+    </h:form>
+
+    <h:form id="findBooksForm" class="find-form">
+        <div class="form-group">
+            <h:outputLabel for="releaseYearControl" class="col-form-label" value="Enter Release Year from what yo want to find XXXX:"/>
+            <h:inputText type="number" id="releaseYearControl" class="form-control" value="#{bookController.book.releaseYear}" />
+            <h:commandButton class="btn btn-secondary" value="Find Books" action="#{bookController.findBooksReleasedAfterYear(bookController.book.releaseYear)}" />
+        </div>
+    </h:form>
+
+    <h:outputScript>
+        function getAllBooks() {
+            fetch('http://localhost:8080/BooksCRUD-1.0-SNAPSHOT/api/book/all')
+                    .then(response => response.json())
+                    .then(data => displayBooksTable(data))
+                    .catch(error => console.error('Error:', error));
+        }
+
+        function getBookById() {
+            var bookId = document.getElementById('bookIdInput').value;
+
+            fetch(`http://localhost:8080/BooksCRUD-1.0-SNAPSHOT/api/book/` + encodeURIComponent(bookId), {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            })
+                    .then(response => response.json())
+                    .then(data => displayBookDetails(data))
+                    .catch(error => console.error('Error:', error));
+        }
+
+        function displayBooksTable(books) {
+            var tableBody = document.getElementById('booksTableBody');
+            tableBody.innerHTML = ''; // Очистити попередні дані
+
+            books.forEach(book => {
+                var row = tableBody.insertRow();
+                var cellId = row.insertCell(0);
+                var cellTitle = row.insertCell(1);
+                var cellGenre = row.insertCell(2);
+                var cellReleaseYear = row.insertCell(3);
+
+                cellId.textContent = book.id;
+                cellTitle.textContent = book.title;
+                cellGenre.textContent = book.genre;
+                cellReleaseYear.textContent = book.releaseYear;
+            });
+        }
+
+        function displayBookDetails(book) {
+            var detailsContainer = document.getElementById('bookDetails');
+            detailsContainer.innerHTML = ''; // Очистити попередні дані
+
+            var detailsTable = document.createElement('table');
+            var row = detailsTable.insertRow();
+            var cellId = row.insertCell(0);
+            var cellTitle = row.insertCell(1);
+            var cellGenre = row.insertCell(2);
+            var cellReleaseYear = row.insertCell(3);
+
+            cellId.textContent = book.id;
+            cellTitle.textContent = book.title;
+            cellGenre.textContent = book.genre;
+            cellReleaseYear.textContent = book.releaseYear;
+
+            detailsContainer.appendChild(detailsTable);
+        }
+
+        function delBookById() {
+        var bookId = document.getElementById('bookIdInput').value;
+
+        fetch(`http://localhost:8080/BooksCRUD-1.0-SNAPSHOT/api/book/delete/` + encodeURIComponent(bookId), {
+        method: 'DELETE',
+        headers: {
+        'Content-Type': 'application/json'
+        }
+        })
+        .then(response => response.json())
+        .then(data => console.log(data))
+        .catch(error => console.error('Error:', error));
+        }
+
+        function addBook() {
+            var title = document.getElementById('titleInput').value;
+            var genre = document.getElementById('genreInput').value;
+            var releaseYear = document.getElementById('releaseYearInput').value;
+
+            var book = {
+                title: title,
+                genre: genre,
+                releaseYear: releaseYear
+            };
+
+            console.log(JSON.stringify(book));
+
+            fetch('http://localhost:8080/BooksCRUD-1.0-SNAPSHOT/api/book/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(book)
+            })
+                    .then(response => response.json())
+                    .then(data => console.log(data))
+                    .catch(error => console.error('Error:', error));
+        }
+
+
+        function updateBook() {
+        var bookId = document.getElementById('updateBookIdInput').value;
+        var title = document.getElementById('updateTitleInput').value;
+        var genre = document.getElementById('updateGenreInput').value;
+        var releaseYear = document.getElementById('updateReleaseYearInput').value;
+
+        var book = {
+        title: title,
+        genre: genre,
+        releaseYear: releaseYear
+        };
+
+        fetch(`http://localhost:8080/BooksCRUD-1.0-SNAPSHOT/api/book/update/` + encodeURIComponent(bookId), {
+        method: 'PUT',
+        headers: {
+        'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(book)
+        })
+        .then(response => response.json())
+        .then(data => console.log(data))
+        .catch(error => console.error('Error:', error));
+        }
+
+
+    </h:outputScript>
+    <h3>RESTful:</h3>
+    <label for="bookIdInput">Book ID:</label>
+    <input type="text" id="bookIdInput"/>
+
+    <button onclick="getAllBooks()">Get All Books</button>
+    <button onclick="getBookById()">Get Book by ID</button>
+    <button onclick="delBookById()">Delete Book by ID</button>
+
+    <h4>Books:</h4>
+    <table>
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Title</th>
+            <th>Genre</th>
+            <th>Release Year</th>
+        </tr>
+        </thead>
+        <tbody id="booksTableBody"></tbody>
+    </table>
+
+    <h4>Book By Id:</h4>
+    <div id="bookDetails"></div>
+
+    <h4>Add Book:</h4>
+    <h:form onsubmit="addBook(); return false;">
+        <label for="titleInput">Title:</label>
+        <input type="text" id="titleInput" />
+
+        <label for="genreInput">Genre:</label>
+        <input type="text" id="genreInput" />
+
+        <label for="releaseYearInput">Release Year:</label>
+        <input type="text" id="releaseYearInput" />
+
+        <button type="submit">Add Book</button>
+    </h:form>
+
+    <h4>Update Book:</h4>
+    <h:form onsubmit="updateBook(); return false;">
+        <label for="updateBookIdInput">Book ID:</label>
+        <input type="text" id="updateBookIdInput" />
+
+        <label for="updateTitleInput">Title:</label>
+        <input type="text" id="updateTitleInput" />
+
+        <label for="updateGenreInput">Genre:</label>
+        <input type="text" id="updateGenreInput" />
+
+        <label for="updateReleaseYearInput">Release Year:</label>
+        <input type="text" id="updateReleaseYearInput" />
+
+        <button type="submit">Update Book</button>
+    </h:form>
+
+
+</h:body>
+</html>

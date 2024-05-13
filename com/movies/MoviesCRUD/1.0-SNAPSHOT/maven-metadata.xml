@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<metadata modelVersion="1.1.0">
+  <groupId>com.books</groupId>
+  <artifactId>BooksCRUD</artifactId>
+  <versioning>
+    <lastUpdated>20240512172839</lastUpdated>
+    <snapshot>
+      <timestamp>20240512.172839</timestamp>
+      <buildNumber>3</buildNumber>
+    </snapshot>
+    <snapshotVersions>
+      <snapshotVersion>
+        <extension>pom</extension>
+        <value>1.0-20240512.172839-3</value>
+        <updated>20240512172839</updated>
+      </snapshotVersion>
+      <snapshotVersion>
+        <extension>war</extension>
+        <value>1.0-20240512.172839-3</value>
+        <updated>20240512172839</updated>
+      </snapshotVersion>
+    </snapshotVersions>
+  </versioning>
+  <version>1.0-SNAPSHOT</version>
+</metadata>

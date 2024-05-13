@@ -1,0 +1,17 @@
+body{
+    padding-top: 50px;
+    padding-bottom: 20px;
+    background: beige;
+}
+
+.book-form, .book-list, .find-form {
+    margin-top: 20px;
+}
+
+.mt-4 {
+    margin-top: 1.5rem !important;
+}
+
+.mt-3 {
+    margin-top: 1rem !important;
+}
